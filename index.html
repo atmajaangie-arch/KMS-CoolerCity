@@ -3,300 +3,499 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>KMS Cooler City Salatiga — Prototype</title>
+  <title>BookStack-style KMS — Cooler City Salatiga</title>
+  <meta name="description" content="Prototype KMS (BookStack-themed) — Cooler City Salatiga" />
   <style>
-    :root{--accent:#0b6efd;--muted:#666}
-    body{font-family:Inter,Segoe UI,Arial;line-height:1.5;margin:0;color:#222}
-    header{background:linear-gradient(90deg,#062a6a,#0b6efd);color:#fff;padding:18px}
-    .container{max-width:1000px;margin:18px auto;padding:0 16px}
-    nav a{color:#fff;margin-right:12px;text-decoration:none;font-weight:600}
-    .hero{background:#f5f8ff;padding:24px;border-radius:8px}
-    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
-    .card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-    .kb-list{list-style:none;padding:0;margin:0}
-    .kb-list li{padding:10px 0;border-bottom:1px solid #eee}
-    .category{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef5ff;color:var(--accent);font-weight:600;margin-right:8px}
-    footer{padding:18px;text-align:center;color:var(--muted);margin-top:24px}
-    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none}
-    form input, form textarea, select{width:100%;padding:8px;margin-top:6px;margin-bottom:12px;border:1px solid #ddd;border-radius:6px}
-    .small{font-size:0.9rem;color:var(--muted)}
-    /* responsive */
-    @media(max-width:880px){.grid{grid-template-columns:1fr}}
-    /* Laporan print styles */
-    @media print{header,footer,.nav-actions{display:none}} 
+    :root{
+      --bg:#f6f8fb;
+      --panel:#ffffff;
+      --muted:#6b7280;
+      --brand:#0b57d0;
+      --accent:#0f62fe;
+      --glass: rgba(255,255,255,0.6);
+      --card-shadow: 0 8px 22px rgba(12,22,48,0.06);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#eef3ff 0%,var(--bg) 100%);color:#0f1724}
+    a { color:var(--brand); text-decoration:none; }
+
+    .wrap{max-width:1200px;margin:28px auto;padding:18px;}
+
+    .cover{max-width:980px;margin:0 auto 20px auto;padding:40px;border-radius:12px;background:linear-gradient(180deg,var(--brand),#3e9bf6);color:#fff;box-shadow:0 18px 50px rgba(3,7,18,0.18)}
+    .cover h1{margin:0;font-size:28px}
+    .cover h2{margin:6px 0 0 0;font-size:20px}
+    .cover .meta{margin-top:18px;font-size:14px}
+
+    header{display:flex;align-items:center;gap:12px;margin:18px 0}
+    .logo{width:56px;height:56px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center}
+    .brand h3{margin:0;font-size:18px}
+    .brand p{margin:0;color:var(--muted);font-size:13px}
+
+    .nav-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .btn{background:var(--brand);color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:13px}
+    .btn.ghost{background:transparent;color:var(--brand);border:1px solid rgba(11,85,208,0.12)}
+
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:18px}
+
+    nav.sidebar{background:var(--panel);padding:14px;border-radius:10px;box-shadow:var(--card-shadow);height:calc(100vh - 220px);position:sticky;top:20px;overflow:auto}
+
+    .search input{width:100%;padding:10px;border-radius:8px;border:1px solid #e9eef8}
+
+    .shelf-list{list-style:none;padding:0;margin:6px 0}
+    .shelf-item{padding:10px;border-radius:8px;cursor:pointer;border:1px solid transparent;display:flex;justify-content:space-between}
+    .shelf-item.active{background:#eef6ff;border-color:#bdd7ff}
+
+    main.content{min-height:70vh}
+
+    .panel{background:var(--panel);padding:14px;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:14px}
+
+    .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:12px}
+    .book{padding:14px;border-radius:10px;border:1px solid #eef4ff;background:#fff}
+
+    .detail{margin-top:12px;padding:16px;border-radius:10px;background:#fff;border:1px solid #edeffa}
+    .detail.hidden{display:none !important}
+
+    .tag{display:inline-block;padding:6px 8px;border-radius:999px;border:1px solid #e6eefc;font-size:12px;margin-right:8px;background:#fff}
+
+    .hidden{display:none !important;}
+
+    footer{text-align:center;margin-top:22px;color:var(--muted);font-size:13px}
+
+    /* Modal backdrop */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(6,10,30,0.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:60;
+    }
   </style>
 </head>
+
 <body>
-  <header>
-    <div class="container">
-      <h1 style="margin:0">KMS — Cooler City Salatiga</h1>
-      <nav style="margin-top:8px">
-        <a href="#home">Beranda</a>
-        <a href="#knowledge">Knowledge Base</a>
-        <a href="#submit">Kirim Pengetahuan</a>
-        <a href="#admin">Admin (Demo)</a>
-        <a href="#laporan">Laporan (Print to PDF)</a>
-      </nav>
+<div class="wrap">
+
+<section class="cover">
+  <div style="display:flex;justify-content:space-between">
+    <div>
+      <h1>Pengembangan Knowledge Management System</h1>
+      <h2>Studi Kasus: <strong>Cooler City Salatiga</strong></h2>
+      <div class="meta">Prototype front-end — Tema BookStack</div>
     </div>
-  </header>
+    <div style="text-align:right">
+      <div style="background:rgba(255,255,255,0.15);padding:8px;border-radius:8px;font-weight:700">Cooler City</div>
+      <div style="margin-top:12px;font-size:14px">
+        Nama: <strong>[Nama]</strong><br>
+        NIM: <strong>[NIM]</strong>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <main class="container">
-    <section id="home" class="hero card">
-      <h2>Studi Kasus: Cooler City Salatiga</h2>
-      <p class="small">Prototype Sistem Manajemen Pengetahuan (KMS) untuk organisasi komunitas dan pelaku usaha di Cooler City — Salatiga. Situs ini berfungsi sebagai folder pengetahuan, panduan SOP, topik teknis, dan FAQ operasional.</p>
-      <p><strong>Fitur demo:</strong> Struktur kategori, artikel knowledge, form pengiriman, peran pengguna (Admin/Editor/Viewer), pencarian sederhana, dan halaman laporan yang bisa di-print jadi PDF untuk penyerahan tugas.</p>
-      <p><strong>Kredensial demo:</strong></p>
-      <ul>
-        <li>Admin: <code>admin@example.com</code> / <code>admin123</code></li>
-        <li>Editor: <code>editor@example.com</code> / <code>editor123</code></li>
-        <li>Viewer: <code>user@example.com</code> / <code>user123</code></li>
-      </ul>
-    </section>
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo">
+      <svg viewBox="0 0 64 64">
+        <rect width="64" height="64" rx="10" fill="#0b57d0"/>
+      </svg>
+    </div>
+    <div class="brand">
+      <h3>Cooler City KMS (BookStack-theme)</h3>
+      <p class="muted">Prototype tampilan — GitHub Pages</p>
+    </div>
+  </div>
 
-    <div class="grid">
-      <section class="card">
-        <h3 id="knowledge">Knowledge base</h3>
-        <p class="small">Contoh artikel dan kategori terkait Cooler City Salatiga.</p>
+  <div class="nav-actions">
+    <div class="muted">Role: <strong id="currentRole">Guest</strong></div>
+    <button class="btn" onclick="openLogin()">Login</button>
+    <a class="btn ghost" href="#" onclick="downloadHTML(event)">Download</a>
+  </div>
+</header>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="search">
+      <input type="search" id="searchBox" placeholder="Cari dokumen..." oninput="filterAll()" />
+    </div>
+
+    <h4 style="margin:8px 0">Shelves & Books</h4>
+    <ul class="shelf-list" id="shelfList"></ul>
+
+    <hr style="border:none;border-top:1px solid #f0f4ff;margin:12px 0">
+
+    <h5 style="margin:6px 0">Quick Links</h5>
+    <ul style="padding-left:14px;color:var(--muted)">
+      <li>Panduan Operasional</li>
+      <li>Template SOP</li>
+      <li>FAQ</li>
+    </ul>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- BOOKS PANEL -->
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <span class="category">UMKM</span>
-          <span class="category">Event</span>
-          <span class="category">SOP</span>
-          <span class="category">Teknis</span>
+          <h3 style="margin:0">Books</h3>
+          <div class="muted" id="bookCount">Menampilkan 0 buku</div>
         </div>
+        <button class="btn" onclick="simulateAddBook()">+ Tambah Book</button>
+      </div>
 
-        <ul class="kb-list" id="kbList">
-          <!-- items filled by JS -->
-        </ul>
-
-      </section>
-
-      <aside class="card">
-        <h4>Cari / Filter</h4>
-        <input id="search" placeholder="Cari kata kunci, mis. vendor, SOP" />
-        <h4 style="margin-top:12px">Kategori</h4>
-        <select id="filterCategory">
-          <option value="">Semua</option>
-        </select>
-        <div style="margin-top:8px"><a class="btn" href="#submit">Kirim Pengetahuan</a></div>
-      </aside>
-    </div>
-
-    <section id="submit" class="card" style="margin-top:18px">
-      <h3>Kirim Pengetahuan (Form Demo)</h3>
-      <p class="small">Gunakan form ini untuk menambahkan artikel. (Demo — tidak menyimpan permanen, hanya client-side)</p>
-      <form id="submitForm">
-        <label>Judul</label>
-        <input id="fTitle" required />
-        <label>Kategori</label>
-        <input id="fCategory" placeholder="contoh: UMKM, SOP, Event" required />
-        <label>Ringkasan</label>
-        <input id="fSummary" />
-        <label>Konten</label>
-        <textarea id="fContent" rows="6" required></textarea>
-        <button type="submit" class="btn">Kirim</button>
-      </form>
+      <div class="books-grid" id="booksGrid"></div>
     </section>
 
-    <section id="admin" class="card" style="margin-top:18px">
-      <h3>Admin Panel (Demo)</h3>
-      <p class="small">Masuk sebagai Admin untuk melihat daftar user & kelola artikel (demo client-side).</p>
-      <form id="loginForm" style="max-width:420px">
-        <label>Email</label>
-        <input id="loginEmail" value="" />
-        <label>Password</label>
-        <input id="loginPassword" type="password" />
-        <button type="submit" class="btn">Masuk</button>
-      </form>
-      <div id="adminArea" style="display:none;margin-top:12px">
-        <h4>Daftar Artikel</h4>
-        <ul id="adminList"></ul>
-        <h4 style="margin-top:12px">Daftar User</h4>
-        <ul id="userList"></ul>
+    <!-- PAGES PANEL -->
+    <section class="panel" id="pagesPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 style="margin:0">Pages</h3>
+          <div class="muted" id="pagesCount">Pilih sebuah buku untuk melihat halaman</div>
+        </div>
+        <button class="btn" onclick="simulateAddPage()">+ Tambah Halaman</button>
+      </div>
+
+      <ul class="pages-list" id="pagesList" style="margin-top:12px"></ul>
+
+      <div class="detail hidden" id="pageDetail">
+        <h2 id="detailTitle">Judul Halaman</h2>
+        <div class="meta" id="detailMeta"></div>
+        <div id="detailContent" style="line-height:1.7;color:#0f1724"></div>
+        <div class="tags" id="detailTags"></div>
       </div>
     </section>
 
-    <section id="laporan" class="card" style="margin-top:18px">
-      <h2>Laporan Tugas Akhir — Pengembangan KMS untuk Cooler City Salatiga</h2>
-      <p class="small">(Halaman ini berisi semua bagian laporan yang dibutuhkan. Untuk menghasilkan PDF: buka menu browser > Print > pilih 'Save as PDF'. Pastikan memilih hanya halaman ini atau gunakan mode print untuk seleksi.)</p>
+    <!-- USER PANEL -->
+    <section class="panel" id="userPanel" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 style="margin:0">Manajemen User</h3>
+          <div class="muted">Hanya Admin</div>
+        </div>
+        <button class="btn" onclick="simulateAddUser()">+ Tambah User</button>
+      </div>
 
-      <h3>Cover</h3>
-      <p><strong>Judul:</strong> Pengembangan Sistem Manajemen Pengetahuan untuk Cooler City Salatiga Menggunakan Prototype HTML</p>
-      <p><strong>Logo UKSW:</strong> [tempatkan logo pada file final]</p>
-      <p><strong>Nama Mahasiswa:</strong> [ISI NAMAMU]</p>
-      <p><strong>NIM:</strong> [ISI NIM]</p>
-      <p><strong>Program Studi / Fakultas:</strong> [ISI]</p>
-      <p><strong>Tahun Penulisan:</strong> 2025</p>
-
-      <h3>1. Pendahuluan</h3>
-      <h4>Profil Organisasi</h4>
-      <p>Cooler City Salatiga adalah pusat komunitas, event, dan kampung UMKM di Kota Salatiga yang mendukung usaha kecil, event kreatif, dan program pemberdayaan masyarakat. Organisasi ini terdiri dari berbagai pelaku: pengurus lokasi, pemilik kios/UMKM, koordinator event, dan relawan.</p>
-
-      <h4>Permasalahan Pengetahuan</h4>
-      <ul>
-        <li>Tidak ada pusat dokumentasi SOP operasional (set up booth, kebersihan, keamanan) sehingga bergantung pada memori individu.</li>
-        <li>Pengetahuan teknis (vendor listrik, supplier pendingin udara, troubleshooting audio) tersebar dan sulit diakses.</li>
-        <li>Informasi event, kontak vendor, dan daftar harga sering hilang atau tidak terdokumentasi sehingga menghambat kontinuitas layanan.</li>
-      </ul>
-
-      <h4>Alasan perlunya KMS</h4>
-      <p>KMS membantu mendokumentasikan SOP, menyimpan kontak vendor, tutorial teknis, dan materi pelatihan; memudahkan transfer pengetahuan antar pengurus serta mengurangi dependensi pada individu.</p>
-
-      <h3>2. Tujuan dan Manfaat</h3>
-      <p><strong>Tujuan:</strong> Mengembangkan prototype KMS berbasis HTML untuk mendokumentasikan, menyimpan, dan mengakses pengetahuan organisasi Cooler City Salatiga.</p>
-      <p><strong>Manfaat:</strong> memudahkan akses informasi, standarisasi proses, mempercepat onboarding relawan, dan menjaga kontinuitas operasional.</p>
-
-      <h3>3. Hasil dan Pembahasan</h3>
-      <h4>Platform open-source & alasan</h4>
-      <p>Untuk memenuhi ketentuan tugas yang meminta platform open-source, pada prototype ini dibuat antarmuka HTML/CSS/JS sederhana yang meniru fitur dasar KMS (karena platform open-source seperti MediaWiki atau BookStack memerlukan instalasi server). Prototype ini dimaksudkan sebagai proof-of-concept serta panduan struktur konten sebelum implementasi di platform open-source nyata.</p>
-
-      <h4>Modifikasi yang dilakukan</h4>
-      <ul>
-        <li>Tema & branding: warna biru khas Cooler City.</li>
-        <li>Struktur kategori: UMKM, Event, SOP, Teknis.</li>
-        <li>Role users (simulasi): Admin, Editor, Viewer — ditunjukkan pada panel demo.</li>
-        <li>Fitur: pencarian, filter kategori, submit knowledge form, mock admin page untuk manajemen.</li>
-      </ul>
-
-      <h4>Penjelasan Aplikasi (screenshots harus ditambahkan pada versi final)</h4>
-      <ol>
-        <li>Halaman beranda: ringkasan organisasi & fitur akses cepat.</li>
-        <li>Struktur kategori: ditampilkan di sidebar dan dalam tiap artikel.</li>
-        <li>Tampilan halaman konten: judul, ringkasan, konten lengkap, tag kategori.</li>
-        <li>Tampilan manajemen user: ditunjukkan di panel admin demo (client-side list).</li>
-        <li>Fitur tambahan: form pengiriman artikel, mock login, laporan tugas yang bisa di-print.</li>
-      </ol>
-
-      <h4>Cara kerja aplikasi (singkat)</h4>
-      <p>Semua data pada prototype disimpan di localStorage browser untuk keperluan demo; pada implementasi nyata, data harus disimpan pada server (database MySQL/PostgreSQL) dan platform KMS open-source seperti BookStack atau MediaWiki dapat dikustomisasi untuk struktur dan hak akses yang lebih kompleks.</p>
-
-      <h3>4. Link Aplikasi (URL Online)</h3>
-      <p>Untuk tugas akhir versi final, Anda harus mengunggah file ini ke hosting gratis seperti Netlify / GitHub Pages / 000webhost dan cantumkan URL di sini.</p>
-      <p>Demo lokal: buka file <code>index.html</code> di browser untuk melihat prototype.</p>
-      <p><strong>Username & password (demo client-side):</strong></p>
-      <ul>
-        <li>Admin: admin@example.com / admin123</li>
-        <li>Editor: editor@example.com / editor123</li>
-        <li>Viewer: user@example.com / user123</li>
-      </ul>
-
-      <h3>5. Lampiran: Instruksi Pengumpulan</h3>
-      <ol>
-        <li>Masukkan nama & NIM di bagian cover di atas.</li>
-        <li>Tambahkan logo UKSW pada cover.</li>
-        <li>Print halaman "Laporan" menjadi PDF dan beri nama: <code>TAS_KMS_Nama_NIM.pdf</code>.</li>
-        <li>Upload folder berisi <code>index.html</code> (jika ada file tambahan) ke hosting dan cantumkan link di laporan.</li>
-      </ol>
-
-      <p style="margin-top:12px" class="small">Catatan: versi final laporan harus menyertakan screenshot aplikasi nyata (halaman beranda, struktur kategori, tampilan konten, manajemen user). Pada prototype ini, screenshot belum terpasang — silakan capture halaman setelah meng-host untuk melengkapi laporan.</p>
-
+      <ul class="user-list" id="userList" style="margin-top:12px"></ul>
     </section>
 
+    <footer>
+      Prototype tampilan BookStack — Cooler City Salatiga • Host via GitHub Pages
+    </footer>
+
   </main>
+</div>
+</div>
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal-backdrop hidden">
+  <div style="background:white;padding:18px;border-radius:12px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(3,7,18,0.35)">
+    <h3 style="margin-top:0">Login Demo</h3>
 
-  <footer>
-    <div class="container">Prototype KMS — Cooler City Salatiga • Dibuat untuk Tugas Akhir (TAS)</div>
-  </footer>
+    <div style="display:flex;gap:8px">
+      <input id="loginUser" placeholder="username" 
+             style="flex:1;padding:10px;border-radius:8px;border:1px solid #e9eef8" />
+      <input id="loginPass" placeholder="password" type="password"
+             style="flex:1;padding:10px;border-radius:8px;border:1px solid #e9eef8" />
+    </div>
 
+    <div style="text-align:right;margin-top:12px">
+      <button class="btn" onclick="doLogin()">Masuk</button>
+      <a href="#" onclick="closeLogin(event)" style="margin-left:8px;color:var(--muted)">Tutup</a>
+    </div>
+
+    <p class="muted" style="margin-top:10px;font-size:13px">
+      Demo akun: <strong>admin/admin</strong>, 
+      <strong>editor/editor</strong>, 
+      <strong>guest/guest</strong>
+    </p>
+  </div>
+</div>
+
+<!-- SCRIPT -->
 <script>
-// Demo data
-const sample = [
-  {id:1,title:'SOP: Persiapan Event di Cooler City',category:'SOP',summary:'Langkah-langkah persiapan event',content:'1. Segera koordinasi dengan koordinator event...\n2. Pastikan kebersihan area...'},
-  {id:2,title:'Daftar Vendor Listrik & Sound System',category:'Teknis',summary:'Kontak vendor lokal',content:'- CV Listrik Jaya: 0812...\n- SoundPro: 0856...'},
-  {id:3,title:'Panduan Pendampingan UMKM',category:'UMKM',summary:'Cara membantu UMKM memasarkan produk',content:'Langkah 1: Foto produk profesional...'},
-  {id:4,title:'Panduan Pengajuan Booth',category:'Event',summary:'Prosedur pengajuan booth',content:'Isi form pengajuan, lampirkan KTP, dsb.'}
+/* -------------------- Data -------------------- */
+const BOOKS = [
+  {id:'b_ops', title:'Operasional', desc:'Buku berisi SOP operasional harian', pages:[
+    {id:'p1', title:'Checklist Harian Operasional', author:'asep', date:'2025-08-02',
+     excerpt:'Daftar pemeriksaan shift manager.',
+     content:'<ol><li>Periksa suhu unit</li><li>Catat pada logbook</li></ol>', tags:['checklist','ops']},
+    {id:'p2', title:'Panduan Shift', author:'admin', date:'2025-06-05',
+     excerpt:'Panduan tugas shift.',
+     content:'<p>Penjelasan tugas shift manager dan staf.</p>', tags:['shift']}
+  ]},
+  {id:'b_sop', title:'SOP & Prosedur', desc:'SOP teknis dan prosedur keselamatan', pages:[
+    {id:'p3', title:'SOP Pemeliharaan Cooler Unit', author:'admin', date:'2025-05-20',
+     excerpt:'Langkah pemeliharaan rutin.',
+     content:'<p>1. Matikan unit…<br/>2. Periksa kebocoran…</p>', tags:['maintenance','sop']},
+    {id:'p4', title:'Prosedur Keamanan Listrik', author:'tech', date:'2025-06-10',
+     excerpt:'Pencegahan kecelakaan listrik.',
+     content:'<p>Gunakan APD saat bekerja.</p>', tags:['safety']}
+  ]},
+  {id:'b_pel', title:'Pelayanan Pelanggan', desc:'Panduan pelayanan & kebijakan pelanggan', pages:[
+    {id:'p5', title:'Panduan Layanan - Refund', author:'anna', date:'2025-07-11',
+     excerpt:'Prosedur refund pelanggan.',
+     content:'<p>Ketentuan refund berlaku jika…</p>', tags:['policy','customer']}
+  ]},
+  {id:'b_mtc', title:'Maintenance', desc:'Perawatan & kebersihan', pages:[
+    {id:'p6', title:'Panduan Kebersihan Area', author:'sweep', date:'2025-10-02',
+     excerpt:'Frekuensi pembersihan area.',
+     content:'<p>1x sehari: sapu & pel…</p>', tags:['cleaning']}
+  ]}
 ];
 
-// init
-const kbList = document.getElementById('kbList');
-const filter = document.getElementById('filterCategory');
-const search = document.getElementById('search');
-let data = JSON.parse(localStorage.getItem('kmsData')) || sample;
+const USERS = [
+  {username:'admin', name:'Administrator', role:'Admin'},
+  {username:'editor', name:'Editor Demo', role:'Editor'},
+  {username:'guest', name:'Guest', role:'Guest'},
+  {username:'asep', name:'Asep (Teknik)', role:'Editor'},
+  {username:'anna', name:'Anna (Resepsionis)', role:'Editor'}
+];
 
-function renderList(items){
-  kbList.innerHTML = '';
-  items.forEach(it=>{
+/* DOM refs */
+const shelfList = document.getElementById('shelfList');
+const booksGrid = document.getElementById('booksGrid');
+const pagesList = document.getElementById('pagesList');
+const pageDetail = document.getElementById('pageDetail');
+const userList = document.getElementById('userList');
+const userPanel = document.getElementById('userPanel');
+
+/* -------------------- Render -------------------- */
+function renderShelves(){
+  shelfList.innerHTML='';
+  BOOKS.forEach(b=>{
     const li=document.createElement('li');
-    li.innerHTML = `<strong>${it.title}</strong><div class="small">${it.category} — ${it.summary}</div><div style="margin-top:6px"><a href="#" onclick='view(${it.id})'>Baca</a></div>`;
-    kbList.appendChild(li);
+    li.className='shelf-item';
+    li.id='shelf-'+b.id;
+    li.innerHTML=`<div>${b.title}</div><div class="muted">${b.pages.length}</div>`;
+    li.onclick=()=>selectBook(b.id);
+    shelfList.appendChild(li);
   });
 }
 
-function populateCategories(){
-  const cats = [...new Set(data.map(d=>d.category))];
-  filter.innerHTML = '<option value="">Semua</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+function renderBooks(){
+  booksGrid.innerHTML='';
+  document.getElementById('bookCount').innerText = `Menampilkan ${BOOKS.length} buku`;
+  BOOKS.forEach(b=>{
+    const div=document.createElement('div');
+    div.className='book';
+    div.innerHTML=`
+      <h4>${b.title}</h4>
+      <div class="meta">${b.desc}</div>
+      <div style="margin-top:10px"><small class="muted">${b.pages.length} halaman</small></div>
+      <div style="margin-top:10px">
+        <a href="#" onclick="selectBook('${b.id}');return false">Buka Buku</a>
+      </div>`;
+    booksGrid.appendChild(div);
+  });
 }
 
-function view(id){
-  const it = data.find(x=>x.id===id);
-  if(!it) return alert('Artikel tidak ditemukan');
-  const win = window.open('','_blank','width=800,height=600');
-  win.document.write(`<html><head><title>${it.title}</title></head><body style="font-family:Arial;padding:20px"><h2>${it.title}</h2><div style="color:#666">Kategori: ${it.category}</div><hr><pre style="white-space:pre-wrap">${it.content}</pre></body></html>`);
+function selectBook(id){
+  document.querySelectorAll('.shelf-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('shelf-'+id);
+  if(el) el.classList.add('active');
+
+  const bk=BOOKS.find(b=>b.id===id);
+  pagesList.innerHTML='';
+  document.getElementById('pagesCount').innerText=`${bk.pages.length} halaman — ${bk.title}`;
+
+  bk.pages.forEach(p=>{
+    const li=document.createElement('li');
+    li.className='page-item';
+    li.innerHTML=`
+      <div>
+        <div class="title">${p.title}</div>
+        <div class="muted">${p.excerpt}</div>
+      </div>
+      <div class="muted" style="display:flex;gap:8px;align-items:center">
+        ${p.date} <a href="#" onclick="openPage('${id}','${p.id}');return false">Buka</a>
+      </div>`;
+    pagesList.appendChild(li);
+  });
+
+  hidePageDetail();
 }
 
-renderList(data); populateCategories();
+function openPage(bid,pid){
+  const bk=BOOKS.find(b=>b.id===bid);
+  const p=bk.pages.find(x=>x.id===pid);
 
-// search / filter
-search.addEventListener('input',()=>{
-  const q = search.value.toLowerCase();
-  const filtered = data.filter(d=>d.title.toLowerCase().includes(q)||d.summary.toLowerCase().includes(q)||d.content.toLowerCase().includes(q));
-  renderList(filtered);
-});
-filter.addEventListener('change',()=>{
-  const c = filter.value;
-  const filtered = c ? data.filter(d=>d.category===c) : data;
-  renderList(filtered);
-});
+  document.getElementById('detailTitle').innerText=p.title;
+  document.getElementById('detailMeta').innerText=
+    `${bk.title} • ${p.author} • ${p.date}`;
+  document.getElementById('detailContent').innerHTML=p.content;
 
-// submit form
-document.getElementById('submitForm').addEventListener('submit',e=>{
+  const tagsEl=document.getElementById('detailTags');
+  tagsEl.innerHTML='';
+  p.tags.forEach(t=>{
+    const sp=document.createElement('span');
+    sp.className='tag';
+    sp.innerText=t;
+    tagsEl.appendChild(sp);
+  });
+
+  pageDetail.classList.remove('hidden');
+}
+
+function hidePageDetail(){
+  pageDetail.classList.add('hidden');
+}
+
+function renderUsers(){
+  userList.innerHTML='';
+  USERS.forEach(u=>{
+    const li=document.createElement('li');
+    li.className='user-item';
+    li.innerHTML=`
+      <div><strong>${u.name}</strong><div class="muted">${u.username}</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="role">${u.role}</div>
+        <button class="btn" onclick="alert('Demo edit user: ${u.username}')">Edit</button>
+      </div>`;
+    userList.appendChild(li);
+  });
+}
+
+/* -------------------- Search -------------------- */
+function filterAll(){
+  const q=document.getElementById('searchBox').value.trim().toLowerCase();
+  booksGrid.innerHTML='';
+  let count=0;
+
+  BOOKS.forEach(b=>{
+    const matched =
+      b.title.toLowerCase().includes(q) ||
+      b.desc.toLowerCase().includes(q) ||
+      b.pages.some(p=> (p.title+p.excerpt+p.content).toLowerCase().includes(q));
+
+    if(q===''||matched){
+      count++;
+
+      const div=document.createElement('div');
+      div.className='book';
+      div.innerHTML=`
+        <h4>${b.title}</h4>
+        <div class="meta">${b.desc}</div>
+        <div style="margin-top:10px"><small class="muted">${b.pages.length} halaman</small></div>
+        <div style="margin-top:10px">
+          <a href="#" onclick="selectBook('${b.id}');return false">Buka Buku</a>
+        </div>`;
+      booksGrid.appendChild(div);
+    }
+  });
+
+  document.getElementById('bookCount').innerText=`Menampilkan ${count} buku`;
+}
+
+/* -------------------- Login -------------------- */
+let currentRole='Guest';
+
+function openLogin(){
+  document.getElementById('loginModal').classList.remove('hidden');
+}
+
+function closeLogin(e){
+  if(e) e.preventDefault();
+  document.getElementById('loginModal').classList.add('hidden');
+}
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim().toLowerCase();
+  const p=document.getElementById('loginPass').value.trim();
+
+  if((u==='admin'&&p==='admin')||
+     (u==='editor'&&p==='editor')||
+     (u==='guest'&&p==='guest')){
+      
+    const usr = USERS.find(x=>x.username===u);
+    currentRole=usr.role;
+
+    document.getElementById('currentRole').innerText=currentRole;
+    document.getElementById('loginModal').classList.add('hidden');
+    applyRoleUI();
+
+    alert('Login sukses: '+usr.name+' ('+usr.role+')');
+  }
+  else {
+    alert('Akun demo: admin/admin, editor/editor, guest/guest');
+  }
+}
+
+function applyRoleUI(){
+  userPanel.style.display = (currentRole==='Admin'?'block':'none');
+
+  document.querySelectorAll('button').forEach(btn=>{
+    if(btn.textContent.includes('Tambah')){
+      btn.disabled = (currentRole==='Guest');
+      btn.style.opacity = btn.disabled?0.6:1;
+    }
+  });
+
+  renderUsers();
+}
+
+/* -------------------- Simulasi Tambah -------------------- */
+function simulateAddBook(){
+  if(currentRole==='Guest') return alert('Hanya Editor/Admin');
+
+  const id='b'+Date.now();
+  BOOKS.unshift({id,title:'Buku Baru',desc:'Deskripsi buku',pages:[]});
+  renderShelves();
+  renderBooks();
+}
+
+function simulateAddPage(){
+  if(currentRole==='Guest') return alert('Hanya Editor/Admin');
+
+  const bk=BOOKS[0];
+  bk.pages.unshift({
+    id:'p'+Date.now(),
+    title:'Halaman Baru',
+    author:currentRole==='Admin'?'admin':'editor',
+    date:new Date().toISOString().slice(0,10),
+    excerpt:'Excerpt halaman baru',
+    content:'<p>Konten demo halaman baru.</p>',
+    tags:['baru']
+  });
+
+  renderShelves();
+  selectBook(bk.id);
+}
+
+function simulateAddUser(){
+  if(currentRole!=='Admin') return alert('Hanya Admin');
+
+  const uname='user'+Date.now();
+  USERS.push({username:uname,name:'User Baru',role:'Editor'});
+  renderUsers();
+}
+
+/* -------------------- Download HTML -------------------- */
+function downloadHTML(e){
   e.preventDefault();
-  const newItem = {
-    id: Date.now(),
-    title: document.getElementById('fTitle').value,
-    category: document.getElementById('fCategory').value,
-    summary: document.getElementById('fSummary').value,
-    content: document.getElementById('fContent').value
-  };
-  data.unshift(newItem);
-  localStorage.setItem('kmsData', JSON.stringify(data));
-  renderList(data);
-  populateCategories();
-  alert('Artikel terkirim (disimpan di browser). Untuk penyimpanan permanen, implementasikan backend.');
-  e.target.reset();
-});
-
-// login demo
-const users = [
-  {email:'admin@example.com',role:'Admin',pw:'admin123'},
-  {email:'editor@example.com',role:'Editor',pw:'editor123'},
-  {email:'user@example.com',role:'Viewer',pw:'user123'}
-];
-
-function renderAdminArea(){
-  document.getElementById('adminArea').style.display='block';
-  const adminList = document.getElementById('adminList');
-  adminList.innerHTML = data.map(d=>`<li>${d.title} — ${d.category} <button onclick="del(${d.id})">Hapus</button></li>`).join('');
-  const userList = document.getElementById('userList');
-  userList.innerHTML = users.map(u=>`<li>${u.email} — ${u.role}</li>`).join('');
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='kms-cooler-city.html';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-document.getElementById('loginForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  const email=document.getElementById('loginEmail').value;
-  const pw=document.getElementById('loginPassword').value;
-  const u = users.find(x=>x.email===email && x.pw===pw);
-  if(!u) return alert('Login gagal — gunakan kredensial demo yang tercantum.');
-  alert('Login berhasil sebagai '+u.role);
-  renderAdminArea();
+/* -------------------- Init -------------------- */
+renderShelves();
+renderBooks();
+applyRoleUI();
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeLogin();
 });
-
-window.del = function(id){
-  if(!confirm('Hapus artikel?')) return;
-  data = data.filter(d=>d.id!==id);
-  localStorage.setItem('kmsData', JSON.stringify(data));
-  renderList(data); renderAdminArea();
-}
-
 </script>
+
 </body>
 </html>
