@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KMS Cooler City Salatiga — Prototype</title>
+  <style>
+    :root{--accent:#0b6efd;--muted:#666}
+    body{font-family:Inter,Segoe UI,Arial;line-height:1.5;margin:0;color:#222}
+    header{background:linear-gradient(90deg,#062a6a,#0b6efd);color:#fff;padding:18px}
+    .container{max-width:1000px;margin:18px auto;padding:0 16px}
+    nav a{color:#fff;margin-right:12px;text-decoration:none;font-weight:600}
+    .hero{background:#f5f8ff;padding:24px;border-radius:8px}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+    .card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+    .kb-list{list-style:none;padding:0;margin:0}
+    .kb-list li{padding:10px 0;border-bottom:1px solid #eee}
+    .category{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef5ff;color:var(--accent);font-weight:600;margin-right:8px}
+    footer{padding:18px;text-align:center;color:var(--muted);margin-top:24px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none}
+    form input, form textarea, select{width:100%;padding:8px;margin-top:6px;margin-bottom:12px;border:1px solid #ddd;border-radius:6px}
+    .small{font-size:0.9rem;color:var(--muted)}
+    /* responsive */
+    @media(max-width:880px){.grid{grid-template-columns:1fr}}
+    /* Laporan print styles */
+    @media print{header,footer,.nav-actions{display:none}} 
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 style="margin:0">KMS — Cooler City Salatiga</h1>
+      <nav style="margin-top:8px">
+        <a href="#home">Beranda</a>
+        <a href="#knowledge">Knowledge Base</a>
+        <a href="#submit">Kirim Pengetahuan</a>
+        <a href="#admin">Admin (Demo)</a>
+        <a href="#laporan">Laporan (Print to PDF)</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="home" class="hero card">
+      <h2>Studi Kasus: Cooler City Salatiga</h2>
+      <p class="small">Prototype Sistem Manajemen Pengetahuan (KMS) untuk organisasi komunitas dan pelaku usaha di Cooler City — Salatiga. Situs ini berfungsi sebagai folder pengetahuan, panduan SOP, topik teknis, dan FAQ operasional.</p>
+      <p><strong>Fitur demo:</strong> Struktur kategori, artikel knowledge, form pengiriman, peran pengguna (Admin/Editor/Viewer), pencarian sederhana, dan halaman laporan yang bisa di-print jadi PDF untuk penyerahan tugas.</p>
+      <p><strong>Kredensial demo:</strong></p>
+      <ul>
+        <li>Admin: <code>admin@example.com</code> / <code>admin123</code></li>
+        <li>Editor: <code>editor@example.com</code> / <code>editor123</code></li>
+        <li>Viewer: <code>user@example.com</code> / <code>user123</code></li>
+      </ul>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h3 id="knowledge">Knowledge base</h3>
+        <p class="small">Contoh artikel dan kategori terkait Cooler City Salatiga.</p>
+        <div>
+          <span class="category">UMKM</span>
+          <span class="category">Event</span>
+          <span class="category">SOP</span>
+          <span class="category">Teknis</span>
+        </div>
+
+        <ul class="kb-list" id="kbList">
+          <!-- items filled by JS -->
+        </ul>
+
+      </section>
+
+      <aside class="card">
+        <h4>Cari / Filter</h4>
+        <input id="search" placeholder="Cari kata kunci, mis. vendor, SOP" />
+        <h4 style="margin-top:12px">Kategori</h4>
+        <select id="filterCategory">
+          <option value="">Semua</option>
+        </select>
+        <div style="margin-top:8px"><a class="btn" href="#submit">Kirim Pengetahuan</a></div>
+      </aside>
+    </div>
+
+    <section id="submit" class="card" style="margin-top:18px">
+      <h3>Kirim Pengetahuan (Form Demo)</h3>
+      <p class="small">Gunakan form ini untuk menambahkan artikel. (Demo — tidak menyimpan permanen, hanya client-side)</p>
+      <form id="submitForm">
+        <label>Judul</label>
+        <input id="fTitle" required />
+        <label>Kategori</label>
+        <input id="fCategory" placeholder="contoh: UMKM, SOP, Event" required />
+        <label>Ringkasan</label>
+        <input id="fSummary" />
+        <label>Konten</label>
+        <textarea id="fContent" rows="6" required></textarea>
+        <button type="submit" class="btn">Kirim</button>
+      </form>
+    </section>
+
+    <section id="admin" class="card" style="margin-top:18px">
+      <h3>Admin Panel (Demo)</h3>
+      <p class="small">Masuk sebagai Admin untuk melihat daftar user & kelola artikel (demo client-side).</p>
+      <form id="loginForm" style="max-width:420px">
+        <label>Email</label>
+        <input id="loginEmail" value="" />
+        <label>Password</label>
+        <input id="loginPassword" type="password" />
+        <button type="submit" class="btn">Masuk</button>
+      </form>
+      <div id="adminArea" style="display:none;margin-top:12px">
+        <h4>Daftar Artikel</h4>
+        <ul id="adminList"></ul>
+        <h4 style="margin-top:12px">Daftar User</h4>
+        <ul id="userList"></ul>
+      </div>
+    </section>
+
+    <section id="laporan" class="card" style="margin-top:18px">
+      <h2>Laporan Tugas Akhir — Pengembangan KMS untuk Cooler City Salatiga</h2>
+      <p class="small">(Halaman ini berisi semua bagian laporan yang dibutuhkan. Untuk menghasilkan PDF: buka menu browser > Print > pilih 'Save as PDF'. Pastikan memilih hanya halaman ini atau gunakan mode print untuk seleksi.)</p>
+
+      <h3>Cover</h3>
+      <p><strong>Judul:</strong> Pengembangan Sistem Manajemen Pengetahuan untuk Cooler City Salatiga Menggunakan Prototype HTML</p>
+      <p><strong>Logo UKSW:</strong> [tempatkan logo pada file final]</p>
+      <p><strong>Nama Mahasiswa:</strong> [ISI NAMAMU]</p>
+      <p><strong>NIM:</strong> [ISI NIM]</p>
+      <p><strong>Program Studi / Fakultas:</strong> [ISI]</p>
+      <p><strong>Tahun Penulisan:</strong> 2025</p>
+
+      <h3>1. Pendahuluan</h3>
+      <h4>Profil Organisasi</h4>
+      <p>Cooler City Salatiga adalah pusat komunitas, event, dan kampung UMKM di Kota Salatiga yang mendukung usaha kecil, event kreatif, dan program pemberdayaan masyarakat. Organisasi ini terdiri dari berbagai pelaku: pengurus lokasi, pemilik kios/UMKM, koordinator event, dan relawan.</p>
+
+      <h4>Permasalahan Pengetahuan</h4>
+      <ul>
+        <li>Tidak ada pusat dokumentasi SOP operasional (set up booth, kebersihan, keamanan) sehingga bergantung pada memori individu.</li>
+        <li>Pengetahuan teknis (vendor listrik, supplier pendingin udara, troubleshooting audio) tersebar dan sulit diakses.</li>
+        <li>Informasi event, kontak vendor, dan daftar harga sering hilang atau tidak terdokumentasi sehingga menghambat kontinuitas layanan.</li>
+      </ul>
+
+      <h4>Alasan perlunya KMS</h4>
+      <p>KMS membantu mendokumentasikan SOP, menyimpan kontak vendor, tutorial teknis, dan materi pelatihan; memudahkan transfer pengetahuan antar pengurus serta mengurangi dependensi pada individu.</p>
+
+      <h3>2. Tujuan dan Manfaat</h3>
+      <p><strong>Tujuan:</strong> Mengembangkan prototype KMS berbasis HTML untuk mendokumentasikan, menyimpan, dan mengakses pengetahuan organisasi Cooler City Salatiga.</p>
+      <p><strong>Manfaat:</strong> memudahkan akses informasi, standarisasi proses, mempercepat onboarding relawan, dan menjaga kontinuitas operasional.</p>
+
+      <h3>3. Hasil dan Pembahasan</h3>
+      <h4>Platform open-source & alasan</h4>
+      <p>Untuk memenuhi ketentuan tugas yang meminta platform open-source, pada prototype ini dibuat antarmuka HTML/CSS/JS sederhana yang meniru fitur dasar KMS (karena platform open-source seperti MediaWiki atau BookStack memerlukan instalasi server). Prototype ini dimaksudkan sebagai proof-of-concept serta panduan struktur konten sebelum implementasi di platform open-source nyata.</p>
+
+      <h4>Modifikasi yang dilakukan</h4>
+      <ul>
+        <li>Tema & branding: warna biru khas Cooler City.</li>
+        <li>Struktur kategori: UMKM, Event, SOP, Teknis.</li>
+        <li>Role users (simulasi): Admin, Editor, Viewer — ditunjukkan pada panel demo.</li>
+        <li>Fitur: pencarian, filter kategori, submit knowledge form, mock admin page untuk manajemen.</li>
+      </ul>
+
+      <h4>Penjelasan Aplikasi (screenshots harus ditambahkan pada versi final)</h4>
+      <ol>
+        <li>Halaman beranda: ringkasan organisasi & fitur akses cepat.</li>
+        <li>Struktur kategori: ditampilkan di sidebar dan dalam tiap artikel.</li>
+        <li>Tampilan halaman konten: judul, ringkasan, konten lengkap, tag kategori.</li>
+        <li>Tampilan manajemen user: ditunjukkan di panel admin demo (client-side list).</li>
+        <li>Fitur tambahan: form pengiriman artikel, mock login, laporan tugas yang bisa di-print.</li>
+      </ol>
+
+      <h4>Cara kerja aplikasi (singkat)</h4>
+      <p>Semua data pada prototype disimpan di localStorage browser untuk keperluan demo; pada implementasi nyata, data harus disimpan pada server (database MySQL/PostgreSQL) dan platform KMS open-source seperti BookStack atau MediaWiki dapat dikustomisasi untuk struktur dan hak akses yang lebih kompleks.</p>
+
+      <h3>4. Link Aplikasi (URL Online)</h3>
+      <p>Untuk tugas akhir versi final, Anda harus mengunggah file ini ke hosting gratis seperti Netlify / GitHub Pages / 000webhost dan cantumkan URL di sini.</p>
+      <p>Demo lokal: buka file <code>index.html</code> di browser untuk melihat prototype.</p>
+      <p><strong>Username & password (demo client-side):</strong></p>
+      <ul>
+        <li>Admin: admin@example.com / admin123</li>
+        <li>Editor: editor@example.com / editor123</li>
+        <li>Viewer: user@example.com / user123</li>
+      </ul>
+
+      <h3>5. Lampiran: Instruksi Pengumpulan</h3>
+      <ol>
+        <li>Masukkan nama & NIM di bagian cover di atas.</li>
+        <li>Tambahkan logo UKSW pada cover.</li>
+        <li>Print halaman "Laporan" menjadi PDF dan beri nama: <code>TAS_KMS_Nama_NIM.pdf</code>.</li>
+        <li>Upload folder berisi <code>index.html</code> (jika ada file tambahan) ke hosting dan cantumkan link di laporan.</li>
+      </ol>
+
+      <p style="margin-top:12px" class="small">Catatan: versi final laporan harus menyertakan screenshot aplikasi nyata (halaman beranda, struktur kategori, tampilan konten, manajemen user). Pada prototype ini, screenshot belum terpasang — silakan capture halaman setelah meng-host untuk melengkapi laporan.</p>
+
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">Prototype KMS — Cooler City Salatiga • Dibuat untuk Tugas Akhir (TAS)</div>
+  </footer>
+
+<script>
+// Demo data
+const sample = [
+  {id:1,title:'SOP: Persiapan Event di Cooler City',category:'SOP',summary:'Langkah-langkah persiapan event',content:'1. Segera koordinasi dengan koordinator event...\n2. Pastikan kebersihan area...'},
+  {id:2,title:'Daftar Vendor Listrik & Sound System',category:'Teknis',summary:'Kontak vendor lokal',content:'- CV Listrik Jaya: 0812...\n- SoundPro: 0856...'},
+  {id:3,title:'Panduan Pendampingan UMKM',category:'UMKM',summary:'Cara membantu UMKM memasarkan produk',content:'Langkah 1: Foto produk profesional...'},
+  {id:4,title:'Panduan Pengajuan Booth',category:'Event',summary:'Prosedur pengajuan booth',content:'Isi form pengajuan, lampirkan KTP, dsb.'}
+];
+
+// init
+const kbList = document.getElementById('kbList');
+const filter = document.getElementById('filterCategory');
+const search = document.getElementById('search');
+let data = JSON.parse(localStorage.getItem('kmsData')) || sample;
+
+function renderList(items){
+  kbList.innerHTML = '';
+  items.forEach(it=>{
+    const li=document.createElement('li');
+    li.innerHTML = `<strong>${it.title}</strong><div class="small">${it.category} — ${it.summary}</div><div style="margin-top:6px"><a href="#" onclick='view(${it.id})'>Baca</a></div>`;
+    kbList.appendChild(li);
+  });
+}
+
+function populateCategories(){
+  const cats = [...new Set(data.map(d=>d.category))];
+  filter.innerHTML = '<option value="">Semua</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function view(id){
+  const it = data.find(x=>x.id===id);
+  if(!it) return alert('Artikel tidak ditemukan');
+  const win = window.open('','_blank','width=800,height=600');
+  win.document.write(`<html><head><title>${it.title}</title></head><body style="font-family:Arial;padding:20px"><h2>${it.title}</h2><div style="color:#666">Kategori: ${it.category}</div><hr><pre style="white-space:pre-wrap">${it.content}</pre></body></html>`);
+}
+
+renderList(data); populateCategories();
+
+// search / filter
+search.addEventListener('input',()=>{
+  const q = search.value.toLowerCase();
+  const filtered = data.filter(d=>d.title.toLowerCase().includes(q)||d.summary.toLowerCase().includes(q)||d.content.toLowerCase().includes(q));
+  renderList(filtered);
+});
+filter.addEventListener('change',()=>{
+  const c = filter.value;
+  const filtered = c ? data.filter(d=>d.category===c) : data;
+  renderList(filtered);
+});
+
+// submit form
+document.getElementById('submitForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const newItem = {
+    id: Date.now(),
+    title: document.getElementById('fTitle').value,
+    category: document.getElementById('fCategory').value,
+    summary: document.getElementById('fSummary').value,
+    content: document.getElementById('fContent').value
+  };
+  data.unshift(newItem);
+  localStorage.setItem('kmsData', JSON.stringify(data));
+  renderList(data);
+  populateCategories();
+  alert('Artikel terkirim (disimpan di browser). Untuk penyimpanan permanen, implementasikan backend.');
+  e.target.reset();
+});
+
+// login demo
+const users = [
+  {email:'admin@example.com',role:'Admin',pw:'admin123'},
+  {email:'editor@example.com',role:'Editor',pw:'editor123'},
+  {email:'user@example.com',role:'Viewer',pw:'user123'}
+];
+
+function renderAdminArea(){
+  document.getElementById('adminArea').style.display='block';
+  const adminList = document.getElementById('adminList');
+  adminList.innerHTML = data.map(d=>`<li>${d.title} — ${d.category} <button onclick="del(${d.id})">Hapus</button></li>`).join('');
+  const userList = document.getElementById('userList');
+  userList.innerHTML = users.map(u=>`<li>${u.email} — ${u.role}</li>`).join('');
+}
+
+document.getElementById('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const email=document.getElementById('loginEmail').value;
+  const pw=document.getElementById('loginPassword').value;
+  const u = users.find(x=>x.email===email && x.pw===pw);
+  if(!u) return alert('Login gagal — gunakan kredensial demo yang tercantum.');
+  alert('Login berhasil sebagai '+u.role);
+  renderAdminArea();
+});
+
+window.del = function(id){
+  if(!confirm('Hapus artikel?')) return;
+  data = data.filter(d=>d.id!==id);
+  localStorage.setItem('kmsData', JSON.stringify(data));
+  renderList(data); renderAdminArea();
+}
+
+</script>
+</body>
+</html>
