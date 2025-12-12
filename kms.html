@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BookStack-style KMS — Cooler City Salatiga</title>
+  <meta name="description" content="Prototype KMS (BookStack-themed) — Cooler City Salatiga" />
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --panel:#ffffff;
+      --muted:#6b7280;
+      --brand:#0b57d0;
+      --accent:#0f62fe;
+      --glass: rgba(255,255,255,0.6);
+      --card-shadow: 0 8px 22px rgba(12,22,48,0.06);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#eef3ff 0%,var(--bg) 100%);color:#0f1724}
+    a { color:var(--brand); text-decoration:none; }
+
+    .wrap{max-width:1200px;margin:28px auto;padding:18px;}
+
+    .cover{max-width:980px;margin:0 auto 20px auto;padding:40px;border-radius:12px;background:linear-gradient(180deg,var(--brand),#3e9bf6);color:#fff;box-shadow:0 18px 50px rgba(3,7,18,0.18)}
+    .cover h1{margin:0;font-size:28px}
+    .cover h2{margin:6px 0 0 0;font-size:20px}
+    .cover .meta{margin-top:18px;font-size:14px}
+
+    header{display:flex;align-items:center;gap:12px;margin:18px 0}
+    .logo{width:56px;height:56px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center}
+    .brand h3{margin:0;font-size:18px}
+    .brand p{margin:0;color:var(--muted);font-size:13px}
+
+    .nav-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .btn{background:var(--brand);color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:13px}
+    .btn.ghost{background:transparent;color:var(--brand);border:1px solid rgba(11,85,208,0.12)}
+
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:18px}
+
+    nav.sidebar{background:var(--panel);padding:14px;border-radius:10px;box-shadow:var(--card-shadow);height:calc(100vh - 220px);position:sticky;top:20px;overflow:auto}
+
+    .search input{width:100%;padding:10px;border-radius:8px;border:1px solid #e9eef8}
+
+    .shelf-list{list-style:none;padding:0;margin:6px 0}
+    .shelf-item{padding:10px;border-radius:8px;cursor:pointer;border:1px solid transparent;display:flex;justify-content:space-between}
+    .shelf-item.active{background:#eef6ff;border-color:#bdd7ff}
+
+    main.content{min-height:70vh}
+
+    .panel{background:var(--panel);padding:14px;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:14px}
+
+    .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:12px}
+    .book{padding:14px;border-radius:10px;border:1px solid #eef4ff;background:#fff}
+
+    .detail{margin-top:12px;padding:16px;border-radius:10px;background:#fff;border:1px solid #edeffa}
+    .detail.hidden{display:none !important}
+
+    .tag{display:inline-block;padding:6px 8px;border-radius:999px;border:1px solid #e6eefc;font-size:12px;margin-right:8px;background:#fff}
+
+    .hidden{display:none !important;}
+
+    footer{text-align:center;margin-top:22px;color:var(--muted);font-size:13px}
+
+    /* Modal backdrop */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(6,10,30,0.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:60;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+<section class="cover">
+  <div style="display:flex;justify-content:space-between">
+    <div>
+      <h1>Pengembangan Knowledge Management System</h1>
+      <h2><strong>Cooler City Salatiga</strong></h2>
+      <div class="meta">Prototype front-end — Tema BookStack</div>
+    </div>
+    <div style="text-align:right">
+      <div style="background:rgba(255,255,255,0.15);padding:8px;border-radius:8px;font-weight:700">Cooler City</div>
+      <div style="margin-top:12px;font-size:14px">
+      </div>
+    </div>
+  </div>
+</section>
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo">
+      <svg viewBox="0 0 64 64">
+        <rect width="64" height="64" rx="10" fill="#0b57d0"/>
+      </svg>
+    </div>
+    <div class="brand">
+      <h3>Cooler City KMS </h3>
+      <p class="muted">Prototype tampilan — GitHub Pages</p>
+    </div>
+  </div>
+
+  <div class="nav-actions">
+    <div class="muted">Role: <strong id="currentRole">Guest</strong></div>
+    <button class="btn" onclick="openLogin()">Login</button>
+    <a class="btn ghost" href="#" onclick="downloadHTML(event)">Download</a>
+  </div>
+</header>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="search">
+      <input type="search" id="searchBox" placeholder="Cari dokumen..." oninput="filterAll()" />
+    </div>
+
+    <h4 style="margin:8px 0">Shelves & Books</h4>
+    <ul class="shelf-list" id="shelfList"></ul>
+
+    <hr style="border:none;border-top:1px solid #f0f4ff;margin:12px 0">
+
+    <h5 style="margin:6px 0">Quick Links</h5>
+    <ul style="padding-left:14px;color:var(--muted)">
+      <li>Panduan Operasional</li>
+      <li>Template SOP</li>
+      <li>FAQ</li>
+    </ul>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- BOOKS PANEL -->
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 style="margin:0">Books</h3>
+          <div class="muted" id="bookCount">Menampilkan 0 buku</div>
+        </div>
+        <button class="btn" onclick="simulateAddBook()">+ Tambah Book</button>
+      </div>
+
+      <div class="books-grid" id="booksGrid"></div>
+    </section>
+
+    <!-- PAGES PANEL -->
+    <section class="panel" id="pagesPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 style="margin:0">Pages</h3>
+          <div class="muted" id="pagesCount">Pilih sebuah buku untuk melihat halaman</div>
+        </div>
+        <button class="btn" onclick="simulateAddPage()">+ Tambah Halaman</button>
+      </div>
+
+      <ul class="pages-list" id="pagesList" style="margin-top:12px"></ul>
+
+      <div class="detail hidden" id="pageDetail">
+        <h2 id="detailTitle">Judul Halaman</h2>
+        <div class="meta" id="detailMeta"></div>
+        <div id="detailContent" style="line-height:1.7;color:#0f1724"></div>
+        <div class="tags" id="detailTags"></div>
+      </div>
+    </section>
+
+    <!-- USER PANEL -->
+    <section class="panel" id="userPanel" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 style="margin:0">Manajemen User</h3>
+          <div class="muted">Hanya Admin</div>
+        </div>
+        <button class="btn" onclick="simulateAddUser()">+ Tambah User</button>
+      </div>
+
+      <ul class="user-list" id="userList" style="margin-top:12px"></ul>
+    </section>
+
+    <footer>
+      Prototype tampilan BookStack — Cooler City Salatiga • Host via GitHub Pages
+    </footer>
+
+  </main>
+</div>
+</div>
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal-backdrop hidden">
+  <div style="background:white;padding:18px;border-radius:12px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(3,7,18,0.35)">
+    <h3 style="margin-top:0">Login Demo</h3>
+
+    <div style="display:flex;gap:8px">
+      <input id="loginUser" placeholder="username" 
+             style="flex:1;padding:10px;border-radius:8px;border:1px solid #e9eef8" />
+      <input id="loginPass" placeholder="password" type="password"
+             style="flex:1;padding:10px;border-radius:8px;border:1px solid #e9eef8" />
+    </div>
+
+    <div style="text-align:right;margin-top:12px">
+      <button class="btn" onclick="doLogin()">Masuk</button>
+      <a href="#" onclick="closeLogin(event)" style="margin-left:8px;color:var(--muted)">Tutup</a>
+    </div>
+
+    <p class="muted" style="margin-top:10px;font-size:13px">
+      Demo akun: <strong>admin/admin</strong>, 
+      <strong>editor/editor</strong>, 
+      <strong>guest/guest</strong>
+    </p>
+  </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+/* -------------------- Data -------------------- */
+const BOOKS = [
+  {id:'b_ops', title:'Operasional', desc:'Buku berisi SOP operasional harian', pages:[
+    {id:'p1',
+  title:'Checklist Harian Operasional',
+  author:'asep',
+  date:'2025-08-02',
+  excerpt:'Daftar pemeriksaan shift manager.',
+  content:`
+<h2>1. Tujuan</h2>
+<p>Checklist ini digunakan oleh shift manager untuk memastikan seluruh aktivitas operasional harian di Cooler City berjalan dengan aman, konsisten, dan sesuai standar.</p>
+
+<h2>2. Waktu Pelaksanaan</h2>
+<ul>
+  <li>Awal shift</li>
+  <li>Tengah shift</li>
+  <li>Akhir shift</li>
+</ul>
+
+<h2>3. Checklist Pemeriksaan Harian</h2>
+
+<h3>3.1. Pemeriksaan Suhu & Kondisi Unit</h3>
+<ol>
+  <li>Periksa suhu unit utama dan pastikan berada pada rentang normal.</li>
+  <li>Catat hasil pengukuran pada logbook atau sistem digital.</li>
+  <li>Pastikan tidak ada alarm atau tanda peringatan pada dashboard kontrol.</li>
+</ol>
+
+<h3>3.2. Kondisi Area Operasional</h3>
+<ol>
+  <li>Pastikan area kerja bersih dan bebas dari hambatan.</li>
+  <li>Cek apakah semua jalur evakuasi tidak terhalang.</li>
+  <li>Pastikan pencahayaan dan ventilasi berfungsi baik.</li>
+</ol>
+
+<h3>3.3. Peralatan & Inventaris</h3>
+<ol>
+  <li>Pastikan alat ukur (termometer, hygrometer, dll.) dalam kondisi baik.</li>
+  <li>Cek kelengkapan APD untuk seluruh staf.</li>
+  <li>Laporkan jika ada alat yang rusak atau hilang.</li>
+</ol>
+
+<h3>3.4. Dokumentasi & Pelaporan</h3>
+<ol>
+  <li>Catat seluruh temuan abnormal pada logbook operasional.</li>
+  <li>Laporkan masalah ke supervisor jika ditemukan potensi gangguan.</li>
+  <li>Lakukan briefing singkat ke staf pada awal shift.</li>
+</ol>
+
+<h2>4. Catatan Tambahan</h2>
+<ul>
+  <li>Setiap temuan harus diselesaikan pada shift yang sama jika memungkinkan.</li>
+  <li>Jika membutuhkan teknisi, segera hubungi bagian terkait.</li>
+  <li>Checklist wajib ditandatangani oleh shift manager di akhir shift.</li>
+</ul>
+
+<p>Checklist harian ini membantu memastikan Cooler City tetap beroperasi dengan efisien, aman, dan sesuai standar operasional yang telah ditetapkan.</p>
+`,
+  tags:['checklist','ops']
+},
+    {id:'p2',
+  title:'Panduan Shift',
+  author:'admin',
+  date:'2025-06-05',
+  excerpt:'Panduan tugas shift.',
+  content:`
+<h2>1. Tujuan</h2>
+<p>Panduan shift ini bertujuan untuk memastikan transisi kerja antar shift berjalan lancar, seluruh tugas operasional tercatat dengan baik, dan tidak ada informasi penting yang terlewat.</p>
+
+<h2>2. Pembagian Shift</h2>
+<ul>
+  <li><strong>Shift Pagi</strong>: 07.00 – 15.00</li>
+  <li><strong>Shift Siang</strong>: 15.00 – 23.00</li>
+  <li><strong>Shift Malam</strong>: 23.00 – 07.00</li>
+</ul>
+
+<h2>3. Tugas Shift Manager</h2>
+
+<h3>3.1. Awal Shift</h3>
+<ol>
+  <li>Lakukan briefing singkat dengan seluruh staf.</li>
+  <li>Periksa kondisi area kerja dan pastikan siap digunakan.</li>
+  <li>Mengelola pembagian tugas harian untuk setiap staf.</li>
+  <li>Memeriksa catatan dan laporan dari shift sebelumnya.</li>
+</ol>
+
+<h3>3.2. Selama Shift</h3>
+<ol>
+  <li>Memastikan SOP operasional berjalan sesuai standar.</li>
+  <li>Memantau performa unit dan mencatat apabila ada anomali.</li>
+  <li>Mengawasi kedisiplinan serta keselamatan kerja staf.</li>
+  <li>Menangani keluhan atau pertanyaan operasional dari tim lain.</li>
+</ol>
+
+<h3>3.3. Akhir Shift</h3>
+<ol>
+  <li>Menyelesaikan catatan laporan harian.</li>
+  <li>Melakukan serah terima dengan shift manager berikutnya.</li>
+  <li>Mencatat temuan penting, masalah, atau bagian yang memerlukan pengecekan lebih lanjut.</li>
+  <li>Memastikan area kerja ditinggalkan dalam keadaan rapi dan aman.</li>
+</ol>
+
+<h2>4. Tugas Staf Shift</h2>
+<ul>
+  <li>Melaksanakan tugas sesuai instruksi shift manager.</li>
+  <li>Mencatat setiap pengecekan pada logbook atau sistem.</li>
+  <li>Melaporkan masalah teknis atau operasional secepatnya.</li>
+  <li>Menjaga kebersihan dan kerapihan area kerja.</li>
+</ul>
+
+<h2>5. Prosedur Serah Terima</h2>
+<ol>
+  <li>Pastikan seluruh pekerjaan pada shift berjalan sudah diselesaikan atau dijelaskan statusnya.</li>
+  <li>Sampaikan informasi penting seperti anomali unit, komplain pelanggan, atau aktivitas teknis.</li>
+  <li>Tandatangani form serah terima sebagai bukti pergantian shift.</li>
+</ol>
+
+<h2>6. Catatan Umum</h2>
+<ul>
+  <li>Kedisiplinan waktu adalah hal wajib untuk kelancaran operasional.</li>
+  <li>Semua aktivitas harus terdokumentasi dengan rapi.</li>
+  <li>Shift manager wajib memastikan keamanan kerja dalam setiap kondisi.</li>
+</ul>
+
+<p>Panduan ini menjadi pedoman utama untuk memastikan operasional harian Cooler City berjalan efektif dan terkoordinasi antar shift.</p>
+`,
+  tags:['shift']
+}
+  ]},
+  {id:'b_sop', title:'SOP & Prosedur', desc:'SOP teknis dan prosedur keselamatan', pages:[
+    {id:'p3',
+  title:'SOP Pemeliharaan Cooler Unit',
+  author:'admin',
+  date:'2025-05-20',
+  excerpt:'Langkah pemeliharaan rutin.',
+  content:`
+<h2>1. Tujuan Pemeliharaan</h2>
+<p>SOP ini dibuat untuk memastikan cooler unit di Cooler City selalu berada dalam kondisi optimal, aman, dan beroperasi sesuai standar. Pemeliharaan rutin bertujuan mencegah kerusakan besar, memperpanjang umur peralatan, dan menjaga efisiensi energi.</p>
+
+<h2>2. Ruang Lingkup</h2>
+<p>Dokumen ini berlaku untuk seluruh teknisi dan staf operasional yang bertanggung jawab terhadap pengecekan, perawatan, serta troubleshooting pada seluruh unit pendingin di area fasilitas Cooler City.</p>
+
+<h2>3. Frekuensi Pemeliharaan</h2>
+<ul>
+<li><strong>Harian:</strong> Pengecekan visual unit.</li>
+<li><strong>Mingguan:</strong> Pemeriksaan komponen dasar.</li>
+<li><strong>Bulanan:</strong> Pemeliharaan menyeluruh sesuai daftar inspeksi.</li>
+<li><strong>3 Bulanan:</strong> Pembersihan intensif dan pengetesan performa.</li>
+</ul>
+
+<h2>4. Peralatan yang Dibutuhkan</h2>
+<ul>
+<li>Kunci pas & obeng</li>
+<li>Multimeter</li>
+<li>Alat pembersih coil</li>
+<li>Termometer digital</li>
+<li>Senter inspeksi</li>
+<li>APD: sarung tangan, masker, sepatu safety</li>
+</ul>
+
+<h2>5. Prosedur Pemeliharaan</h2>
+
+<h3>5.1. Prosedur Umum</h3>
+<ol>
+<li>Pastikan unit dalam kondisi aman sebelum bekerja.</li>
+<li>Gunakan APD lengkap.</li>
+<li>Matikan aliran listrik sebelum membuka panel.</li>
+<li>Gunakan alat yang sesuai standar.</li>
+<li>Isi logbook pemeliharaan setelah pekerjaan selesai.</li>
+</ol>
+
+<h3>5.2. Langkah Pemeliharaan Rutin</h3>
+<ol>
+<li><strong>Matikan unit dan amankan sumber listrik.</strong></li>
+<li><strong>Periksa kebocoran refrigerant.</strong> Lakukan inspeksi visual pada jalur pipa dan sambungan.</li>
+<li><strong>Bersihkan evaporator dan condenser coil.</strong> Hilangkan debu yang dapat menghambat sirkulasi udara.</li>
+<li><strong>Cek kipas dan motor blower.</strong> Pastikan tidak ada suara abnormal atau getaran berlebih.</li>
+<li><strong>Ukur suhu keluaran.</strong> Pastikan berada dalam rentang standar operasional.</li>
+<li><strong>Cek kondisi kabel dan konektor.</strong> Pastikan tidak ada kerusakan, retakan, atau sambungan longgar.</li>
+<li><strong>Bersihkan area sekitar unit.</strong> Pastikan tidak ada halangan yang mengganggu ventilasi.</li>
+<li><strong>Nyalakan kembali unit dan uji performa.</strong></li>
+</ol>
+
+<h2>6. Standar Kinerja Normal</h2>
+<ul>
+<li>Suhu keluaran udara dingin stabil.</li>
+<li>Tidak ada suara abnormal dari kompresor atau blower.</li>
+<li>Tidak terdapat kebocoran air maupun refrigerant.</li>
+<li>Konsumsi listrik berada dalam parameter normal.</li>
+</ul>
+
+<h2>7. Catatan Keselamatan (K3)</h2>
+<ul>
+<li>Jangan menyentuh komponen listrik dengan tangan basah.</li>
+<li>Hindari membuka panel saat unit masih menyala.</li>
+<li>Gunakan kacamata pelindung saat membersihkan coil.</li>
+<li>Simpan bahan kimia pembersih pada tempat aman.</li>
+</ul>
+
+<h2>8. Dokumentasi & Pelaporan</h2>
+<p>Setiap teknisi wajib mencatat:</p>
+<ul>
+<li>Waktu dan tanggal pemeliharaan</li>
+<li>Nama teknisi</li>
+<li>Status unit sebelum & sesudah pengecekan</li>
+<li>Komponen yang diperbaiki/diganti</li>
+<li>Rekomendasi tindak lanjut</li>
+</ul>
+
+<p>SOP ini membantu memastikan cooler unit di Cooler City dapat beroperasi stabil, aman, dan efisien.</p>
+`,
+  tags:['maintenance','sop']
+},
+    {id:'p4',
+  title:'Prosedur Keamanan Listrik',
+  author:'tech',
+  date:'2025-06-10',
+  excerpt:'Pencegahan kecelakaan listrik.',
+  content:`
+<h2>1. Tujuan</h2>
+<p>Prosedur ini bertujuan untuk memastikan seluruh pekerjaan yang berhubungan dengan peralatan listrik di Cooler City dilakukan secara aman, mencegah risiko sengatan listrik, kebakaran, maupun kerusakan peralatan.</p>
+
+<h2>2. Ruang Lingkup</h2>
+<p>Mencakup seluruh staf teknisi, operator, dan pekerja yang terlibat dalam pengoperasian, perawatan, atau perbaikan perangkat listrik di area Cooler City.</p>
+
+<h2>3. Perlengkapan Keselamatan</h2>
+<ul>
+  <li>APD lengkap (helm, sarung tangan isolasi, sepatu safety)</li>
+  <li>Multimeter terkalibrasi</li>
+  <li>Obeng insulated</li>
+  <li>Kabel pengaman</li>
+  <li>Fuse cadangan</li>
+  <li>Rambu peringatan "Sedang Dikerjakan"</li>
+</ul>
+
+<h2>4. Prosedur Pengamanan</h2>
+
+<h3>4.1. Sebelum Bekerja</h3>
+<ol>
+  <li>Pastikan semua teknisi memahami SOP ini sebelum memulai pekerjaan.</li>
+  <li>Gunakan APD sesuai standar keselamatan.</li>
+  <li>Matikan sumber listrik dari panel utama atau MCB terkait.</li>
+  <li>Pasang tanda peringatan <strong>“Lockout/Tagout – Jangan Dihidupkan”</strong>.</li>
+  <li>Gunakan multimeter untuk memastikan tidak ada arus mengalir.</li>
+</ol>
+
+<h3>4.2. Saat Bekerja</h3>
+<ol>
+  <li>Hanya gunakan alat insulated untuk menghindari kontak langsung dengan arus listrik.</li>
+  <li>Hindari lingkungan kerja yang basah atau lembap.</li>
+  <li>Jangan menyentuh dua titik konduktor secara bersamaan.</li>
+  <li>Jaga kebersihan area kerja dari benda logam yang tidak diperlukan.</li>
+  <li>Jika terjadi percikan atau bau hangus, hentikan pekerjaan segera.</li>
+</ol>
+
+<h3>4.3. Setelah Bekerja</h3>
+<ol>
+  <li>Periksa ulang sambungan kabel dan pastikan semua komponen terpasang dengan benar.</li>
+  <li>Lepas rambu Lockout/Tagout hanya setelah memastikan pekerjaan selesai dan aman.</li>
+  <li>Nyalakan kembali MCB atau sumber listrik secara bertahap.</li>
+  <li>Amati peralatan selama 2–5 menit untuk memastikan tidak ada abnormalitas.</li>
+  <li>Catat hasil pekerjaan pada log sheet harian.</li>
+</ol>
+
+<h2>5. Tanda-Tanda Bahaya</h2>
+<ul>
+  <li>Bau kabel terbakar</li>
+  <li>Kip sparks atau percikan listrik</li>
+  <li>MCB sering trip</li>
+  <li>Panas berlebih pada panel listrik</li>
+  <li>Getaran abnormal pada peralatan listrik</li>
+</ul>
+
+<h2>6. Tindakan Darurat</h2>
+<ul>
+  <li>Matikan daya pada panel utama.</li>
+  <li>Jangan menyentuh korban sengatan listrik secara langsung.</li>
+  <li>Gunakan benda isolator (kayu/karet) untuk menjauhkan korban dari sumber listrik.</li>
+  <li>Hubungi petugas P3K atau tim darurat internal.</li>
+  <li>Laporkan kejadian ke supervisor dan dokumentasikan secara lengkap.</li>
+</ul>
+
+<h2>7. Dokumentasi Wajib</h2>
+<ul>
+  <li>Tanggal dan waktu pekerjaan</li>
+  <li>Nama teknisi</li>
+  <li>Peralatan yang diperiksa</li>
+  <li>Temuan abnormalitas</li>
+  <li>Saran perbaikan</li>
+</ul>
+
+<p>Dengan mengikuti SOP ini, seluruh staf dapat bekerja dengan aman dan mengurangi risiko kecelakaan listrik di Cooler City.</p>
+`,
+  tags:['safety']
+}
+  ]},
+  {id:'b_pel', title:'Pelayanan Pelanggan', desc:'Panduan pelayanan & kebijakan pelanggan', pages:[
+    {
+  id:'p5',
+  title:'Panduan Layanan - Refund',
+  author:'anna',
+  date:'2025-07-11',
+  excerpt:'Prosedur refund pelanggan.',
+  content:`
+<h2>1. Tujuan Pelayanan Refund</h2>
+<p>Sistem refund di Cooler City disediakan untuk memastikan pelanggan mendapatkan pelayanan yang adil, responsif, dan transparan ketika terjadi kendala dalam transaksi atau penggunaan layanan.</p>
+
+<h2>2. Syarat Pengajuan Refund</h2>
+<p>Pelanggan dapat mengajukan refund apabila memenuhi kondisi berikut:</p>
+<ul>
+<li>Pembayaran terduplikasi atau tidak sengaja dilakukan dua kali.</li>
+<li>Pembayaran berhasil tetapi layanan tidak dapat digunakan.</li>
+<li>Layanan atau produk yang diterima tidak sesuai dengan deskripsi.</li>
+<li>Terjadi gangguan sistem Cooler City yang menyebabkan layanan gagal berjalan.</li>
+<li>Pembatalan layanan masih dalam periode yang diizinkan sesuai kebijakan.</li>
+</ul>
+
+<h2>3. Informasi yang Wajib Disertakan</h2>
+<p>Saat mengajukan refund, pelanggan wajib memberikan:</p>
+<ul>
+<li>Nama lengkap pelanggan</li>
+<li>Nomor transaksi atau bukti pembayaran</li>
+<li>Alasan pengajuan refund</li>
+<li>Bukti pendukung (foto, screenshot, atau keterangan tambahan)</li>
+</ul>
+
+<h2>4. Alur Pengajuan Refund</h2>
+<ol>
+<li>Pelanggan menghubungi Customer Service melalui WhatsApp, email resmi, atau formulir pada website.</li>
+<li>Tim Customer Service melakukan verifikasi data dan bukti pendukung.</li>
+<li>Keputusan diterbitkan dalam <strong>1–3 hari kerja</strong>.</li>
+<li>Jika disetujui, refund diproses melalui metode pembayaran awal.</li>
+</ol>
+
+<h2>5. Waktu & Metode Pengembalian Dana</h2>
+<ul>
+<li><strong>E-wallet / Virtual Account:</strong> 1–2 hari kerja</li>
+<li><strong>Transfer Bank:</strong> 2–5 hari kerja</li>
+<li><strong>Metode Alternatif:</strong> Jika metode awal bermasalah, dilakukan atas persetujuan pelanggan</li>
+</ul>
+
+<h2>6. Kondisi di Mana Refund Tidak Dapat Diproses</h2>
+<ul>
+<li>Layanan telah digunakan melewati batas waktu pengajuan refund.</li>
+<li>Bukti pembayaran atau bukti transaksi tidak tersedia.</li>
+<li>Permintaan bertentangan dengan kebijakan Cooler City.</li>
+<li>Transaksi dilakukan melalui pihak ketiga yang tidak terverifikasi.</li>
+</ul>
+
+<h2>7. Kontak Bantuan</h2>
+<p>Untuk informasi lebih lanjut, pelanggan dapat menghubungi Customer Service Cooler City pada jam operasional yang tertera pada website atau aplikasi resmi.</p>
+
+<p>Dengan panduan ini, Cooler City memastikan proses refund berjalan transparan, cepat, dan memberikan rasa aman bagi pelanggan.</p>
+`
+,
+  tags:['policy','customer']
+}
+
+  ]},
+  {id:'b_mtc', title:'Maintenance', desc:'Perawatan & kebersihan', pages:[
+    {id:'p6', title:'Panduan Kebersihan Area', author:'sweep', date:'2025-10-02',
+ excerpt:'Sistem kebersihan area untuk menjaga fasilitas tetap bersih dan aman.',
+ content:`
+<h2>1. Tujuan Sistem Kebersihan</h2>
+<p>Sistem kebersihan di Cooler City dibuat untuk memastikan seluruh area fasilitas selalu dalam kondisi bersih, aman, dan nyaman digunakan oleh staf maupun pengunjung. Panduan ini membantu petugas mengikuti standar operasional pembersihan agar pekerjaan lebih terstruktur, konsisten, dan dapat dipertanggungjawabkan.</p>
+
+<h2>2. Ruang Lingkup Area yang Dibersihkan</h2>
+<ul>
+<li>Area layanan dan front office</li>
+<li>Ruang kerja staf</li>
+<li>Lorong dan akses keluar-masuk</li>
+<li>Area penyimpanan</li>
+<li>Toilet dan fasilitas umum</li>
+<li>Halaman atau area luar</li>
+</ul>
+
+<h2>3. Frekuensi Pembersihan</h2>
+
+<h3>a. Pembersihan Harian (1x sehari)</h3>
+<ul>
+<li>Menyapu dan mengepel seluruh lantai</li>
+<li>Membersihkan debu pada meja, kursi, dan permukaan terbuka</li>
+<li>Mengosongkan tempat sampah dan mengganti kantong</li>
+<li>Membersihkan kaca yang terkena sidik jari</li>
+<li>Mengecek kebersihan toilet</li>
+</ul>
+
+<h3>b. Pembersihan Berkala (2–3x per minggu)</h3>
+<ul>
+<li>Membersihkan ventilasi dan kisi-kisi</li>
+<li>Menyikat lantai kamar mandi</li>
+<li>Membersihkan area pantry/kitchenette</li>
+<li>Disinfeksi ringan</li>
+</ul>
+
+<h3>c. Pembersihan Mendalam (1x per bulan)</h3>
+<ul>
+<li>Vacuum karpet dan sudut area sulit dijangkau</li>
+<li>Disinfeksi ruangan</li>
+<li>Membersihkan lampu dan permukaan tinggi</li>
+<li>Mengelap rak dan lemari penyimpanan</li>
+</ul>
+
+<h2>4. Peralatan dan Bahan Kebersihan</h2>
+<ul>
+<li>Sapu, pel, ember</li>
+<li>Kain microfiber</li>
+<li>Cairan pembersih lantai</li>
+<li>Pembersih kaca</li>
+<li>Disinfektan</li>
+<li>Sarung tangan</li>
+</ul>
+
+<h2>5. Prosedur Umum Kebersihan</h2>
+<ol>
+<li>Pastikan peralatan layak pakai sebelum mulai bekerja.</li>
+<li>Gunakan sarung tangan dan APD.</li>
+<li>Bersihkan dari area paling bersih ke area paling kotor.</li>
+<li>Isi logbook kebersihan harian setelah selesai.</li>
+<li>Laporkan kerusakan atau area yang membutuhkan perhatian khusus.</li>
+</ol>
+
+<h2>6. Catatan Keselamatan (K3)</h2>
+<ul>
+<li>Hindari penggunaan cairan berlebihan untuk mencegah lantai licin.</li>
+<li>Gunakan signage “Lantai Basah”.</li>
+<li>Jangan mencampur bahan kimia tanpa instruksi.</li>
+<li>Simpan bahan kimia pada tempat terkunci dan aman.</li>
+</ul>
+
+<h2>7. Dokumentasi Kebersihan</h2>
+<p>Petugas wajib mencatat:</p>
+<ul>
+<li>Tanggal dan waktu kerja</li>
+<li>Nama petugas</li>
+<li>Area yang dibersihkan</li>
+<li>Jenis pekerjaan (harian/berkala/mendalam)</li>
+<li>Catatan khusus bila ada</li>
+</ul>
+
+<p>Panduan ini memastikan Cooler City tetap bersih, aman, dan terawat.</p>
+`
+, tags:['cleaning']}
+
+  ]}
+];
+
+const USERS = [
+  {username:'admin', name:'Administrator', role:'Admin'},
+  {username:'editor', name:'Editor Demo', role:'Editor'},
+  {username:'guest', name:'Guest', role:'Guest'},
+  {username:'asep', name:'Asep (Teknik)', role:'Editor'},
+  {username:'anna', name:'Anna (Resepsionis)', role:'Editor'}
+];
+
+/* DOM refs */
+const shelfList = document.getElementById('shelfList');
+const booksGrid = document.getElementById('booksGrid');
+const pagesList = document.getElementById('pagesList');
+const pageDetail = document.getElementById('pageDetail');
+const userList = document.getElementById('userList');
+const userPanel = document.getElementById('userPanel');
+
+/* -------------------- Render -------------------- */
+function renderShelves(){
+  shelfList.innerHTML='';
+  BOOKS.forEach(b=>{
+    const li=document.createElement('li');
+    li.className='shelf-item';
+    li.id='shelf-'+b.id;
+    li.innerHTML=`<div>${b.title}</div><div class="muted">${b.pages.length}</div>`;
+    li.onclick=()=>selectBook(b.id);
+    shelfList.appendChild(li);
+  });
+}
+
+function renderBooks(){
+  booksGrid.innerHTML='';
+  document.getElementById('bookCount').innerText = `Menampilkan ${BOOKS.length} buku`;
+  BOOKS.forEach(b=>{
+    const div=document.createElement('div');
+    div.className='book';
+    div.innerHTML=`
+      <h4>${b.title}</h4>
+      <div class="meta">${b.desc}</div>
+      <div style="margin-top:10px"><small class="muted">${b.pages.length} halaman</small></div>
+      <div style="margin-top:10px">
+        <a href="#" onclick="selectBook('${b.id}');return false">Buka Buku</a>
+      </div>`;
+    booksGrid.appendChild(div);
+  });
+}
+
+function selectBook(id){
+  document.querySelectorAll('.shelf-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('shelf-'+id);
+  if(el) el.classList.add('active');
+
+  const bk=BOOKS.find(b=>b.id===id);
+  pagesList.innerHTML='';
+  document.getElementById('pagesCount').innerText=`${bk.pages.length} halaman — ${bk.title}`;
+
+  bk.pages.forEach(p=>{
+    const li=document.createElement('li');
+    li.className='page-item';
+    li.innerHTML=`
+      <div>
+        <div class="title">${p.title}</div>
+        <div class="muted">${p.excerpt}</div>
+      </div>
+      <div class="muted" style="display:flex;gap:8px;align-items:center">
+        ${p.date} <a href="#" onclick="openPage('${id}','${p.id}');return false">Buka</a>
+      </div>`;
+    pagesList.appendChild(li);
+  });
+
+  hidePageDetail();
+}
+
+function openPage(bid,pid){
+  const bk=BOOKS.find(b=>b.id===bid);
+  const p=bk.pages.find(x=>x.id===pid);
+
+  document.getElementById('detailTitle').innerText=p.title;
+  document.getElementById('detailMeta').innerText=
+    `${bk.title} • ${p.author} • ${p.date}`;
+  document.getElementById('detailContent').innerHTML=p.content;
+
+  const tagsEl=document.getElementById('detailTags');
+  tagsEl.innerHTML='';
+  p.tags.forEach(t=>{
+    const sp=document.createElement('span');
+    sp.className='tag';
+    sp.innerText=t;
+    tagsEl.appendChild(sp);
+  });
+
+  pageDetail.classList.remove('hidden');
+}
+
+function hidePageDetail(){
+  pageDetail.classList.add('hidden');
+}
+
+function renderUsers(){
+  userList.innerHTML='';
+  USERS.forEach(u=>{
+    const li=document.createElement('li');
+    li.className='user-item';
+    li.innerHTML=`
+      <div><strong>${u.name}</strong><div class="muted">${u.username}</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="role">${u.role}</div>
+        <button class="btn" onclick="alert('Demo edit user: ${u.username}')">Edit</button>
+      </div>`;
+    userList.appendChild(li);
+  });
+}
+
+/* -------------------- Search -------------------- */
+function filterAll(){
+  const q=document.getElementById('searchBox').value.trim().toLowerCase();
+  booksGrid.innerHTML='';
+  let count=0;
+
+  BOOKS.forEach(b=>{
+    const matched =
+      b.title.toLowerCase().includes(q) ||
+      b.desc.toLowerCase().includes(q) ||
+      b.pages.some(p=> (p.title+p.excerpt+p.content).toLowerCase().includes(q));
+
+    if(q===''||matched){
+      count++;
+
+      const div=document.createElement('div');
+      div.className='book';
+      div.innerHTML=`
+        <h4>${b.title}</h4>
+        <div class="meta">${b.desc}</div>
+        <div style="margin-top:10px"><small class="muted">${b.pages.length} halaman</small></div>
+        <div style="margin-top:10px">
+          <a href="#" onclick="selectBook('${b.id}');return false">Buka Buku</a>
+        </div>`;
+      booksGrid.appendChild(div);
+    }
+  });
+
+  document.getElementById('bookCount').innerText=`Menampilkan ${count} buku`;
+}
+
+/* -------------------- Login -------------------- */
+let currentRole='Guest';
+
+function openLogin(){
+  document.getElementById('loginModal').classList.remove('hidden');
+}
+
+function closeLogin(e){
+  if(e) e.preventDefault();
+  document.getElementById('loginModal').classList.add('hidden');
+}
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim().toLowerCase();
+  const p=document.getElementById('loginPass').value.trim();
+
+  if((u==='admin'&&p==='admin')||
+     (u==='editor'&&p==='editor')||
+     (u==='guest'&&p==='guest')){
+      
+    const usr = USERS.find(x=>x.username===u);
+    currentRole=usr.role;
+
+    document.getElementById('currentRole').innerText=currentRole;
+    document.getElementById('loginModal').classList.add('hidden');
+    applyRoleUI();
+
+    alert('Login sukses: '+usr.name+' ('+usr.role+')');
+  }
+  else {
+    alert('Akun demo: admin/admin, editor/editor, guest/guest');
+  }
+}
+
+function applyRoleUI(){
+  userPanel.style.display = (currentRole==='Admin'?'block':'none');
+
+  document.querySelectorAll('button').forEach(btn=>{
+    if(btn.textContent.includes('Tambah')){
+      btn.disabled = (currentRole==='Guest');
+      btn.style.opacity = btn.disabled?0.6:1;
+    }
+  });
+
+  renderUsers();
+}
+
+/* -------------------- Simulasi Tambah -------------------- */
+function simulateAddBook(){
+  if(currentRole==='Guest') return alert('Hanya Editor/Admin');
+
+  const id='b'+Date.now();
+  BOOKS.unshift({id,title:'Buku Baru',desc:'Deskripsi buku',pages:[]});
+  renderShelves();
+  renderBooks();
+}
+
+function simulateAddPage(){
+  if(currentRole==='Guest') return alert('Hanya Editor/Admin');
+
+  const bk=BOOKS[0];
+  bk.pages.unshift({
+    id:'p'+Date.now(),
+    title:'Halaman Baru',
+    author:currentRole==='Admin'?'admin':'editor',
+    date:new Date().toISOString().slice(0,10),
+    excerpt:'Excerpt halaman baru',
+    content:'<p>Konten demo halaman baru.</p>',
+    tags:['baru']
+  });
+
+  renderShelves();
+  selectBook(bk.id);
+}
+
+function simulateAddUser(){
+  if(currentRole!=='Admin') return alert('Hanya Admin');
+
+  const uname='user'+Date.now();
+  USERS.push({username:uname,name:'User Baru',role:'Editor'});
+  renderUsers();
+}
+
+/* -------------------- Download HTML -------------------- */
+function downloadHTML(e){
+  e.preventDefault();
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='kms-cooler-city.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* -------------------- Init -------------------- */
+renderShelves();
+renderBooks();
+applyRoleUI();
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeLogin();
+});
+</script>
+
+</body>
+</html>
